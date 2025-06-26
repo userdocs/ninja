@@ -169,9 +169,13 @@ jobs:
           python3 misc/ninja_syntax_test.py
           ./misc/output_test.py
 
-  build-aarch64:
-    name: Build Linux ARM64
-    runs-on: [ubuntu-24.04-arm]
+  build-aarch64-native:
+    name: Build Linux ARM64 native
+    runs-on: [ubuntu-22.04-arm]
+    defaults:
+      run:
+        shell: bash
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -202,7 +206,166 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ninja-aarch64-binary-archives
+          name: ninja-aarch64-binary-archives-native
+          path: artifact
+
+      - name: Upload release asset
+        if: github.event.action == 'published'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./artifact/ninja-linux-aarch64.zip
+          asset_name: ninja-linux-aarch64.zip
+          asset_content_type: application/zip
+
+  build-aarch64-debian:
+    name: Build Linux ARM64 debian
+    runs-on: [ubuntu-24.04-arm]
+    container: debian:bullseye
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - run: |
+          apt-get update -q -y
+          apt-get install -q -y make gcc g++ libasan5 clang-tools curl p7zip-full file cmake re2c
+
+      - run: |
+          # BUILD
+          cmake -DCMAKE_BUILD_TYPE=Release -B release-build
+          cmake --build release-build --parallel --config Release
+          strip release-build/ninja
+          file release-build/ninja
+
+          # TEST
+          pushd release-build
+          ./ninja_test
+          popd
+
+          # CREATE ARCHIVE
+          mkdir artifact
+          7z a artifact/ninja-linux-aarch64.zip ./release-build/ninja
+
+      # Upload ninja binary archive as an artifact
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ninja-aarch64-binary-archives-debian
+          path: artifact
+
+      - name: Upload release asset
+        if: github.event.action == 'published'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./artifact/ninja-linux-aarch64.zip
+          asset_name: ninja-linux-aarch64.zip
+          asset_content_type: application/zip
+
+  build-aarch64-rocky9:
+    name: Build Linux ARM64 rocky9
+    runs-on: [ubuntu-24.04-arm]
+    container: rockylinux/rockylinux:9
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - run: |
+          dnf update -y
+          dnf install -y epel-release
+          dnf install -y make gcc gcc-c++ libasan clang-tools-extra p7zip p7zip-plugins file cmake re2c
+
+      - run: |
+          # BUILD
+          cmake -DCMAKE_BUILD_TYPE=Release -B release-build
+          cmake --build release-build --parallel --config Release
+          strip release-build/ninja
+          file release-build/ninja
+
+          # TEST
+          pushd release-build
+          ./ninja_test
+          popd
+
+          # CREATE ARCHIVE
+          mkdir artifact
+          7z a artifact/ninja-linux-aarch64.zip ./release-build/ninja
+
+      # Upload ninja binary archive as an artifact
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ninja-aarch64-binary-archives-rocky9
+          path: artifact
+
+      - name: Upload release asset
+        if: github.event.action == 'published'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./artifact/ninja-linux-aarch64.zip
+          asset_name: ninja-linux-aarch64.zip
+          asset_content_type: application/zip
+
+  build-aarch64-rocky8:
+    name: Build Linux ARM64 rocky8
+    runs-on: [ubuntu-24.04-arm]
+    container: rockylinux/rockylinux:8
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - run: |
+          dnf update -y
+          dnf install -y epel-release
+          dnf config-manager --set-enabled powertools
+          dnf install -y make gcc gcc-c++ libasan clang-tools-extra p7zip p7zip-plugins file cmake re2c
+
+      - run: |
+          # BUILD
+          cmake -DCMAKE_BUILD_TYPE=Release -B release-build
+          cmake --build release-build --parallel --config Release
+          strip release-build/ninja
+          file release-build/ninja
+
+          # TEST
+          pushd release-build
+          ./ninja_test
+          popd
+
+          # CREATE ARCHIVE
+          mkdir artifact
+          7z a artifact/ninja-linux-aarch64.zip ./release-build/ninja
+
+      # Upload ninja binary archive as an artifact
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ninja-aarch64-binary-archives-rocky8
           path: artifact
 
       - name: Upload release asset
