@@ -127,7 +127,7 @@ jobs:
         run: |
           apt update
           apt install -y python3-pytest ninja-build python3-pip clang libgtest-dev
-          pip3 install cmake
+          pip3 install cmake==3.20.3
       - name: Configure (GCC)
         run: cmake -Bbuild-gcc -DCMAKE_BUILD_TYPE=Debug -G'Ninja Multi-Config'
 
