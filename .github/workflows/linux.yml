@@ -144,7 +144,7 @@ jobs:
                 gh_url_arch="https://github.com/cli/cli/releases/download/v2.74.2/gh_2.74.2_linux_amd64.tar.gz"
             fi
 
-            echo "url: ${gh_url_arch}
+            echo "url: ${gh_url_arch}"
 
             curl -sL "${gh_url_arch}" | tar xfz - -C /usr/local/bin --strip-components=2
             chmod 700 /usr/local/bin/gh
