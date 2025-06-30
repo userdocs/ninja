@@ -146,12 +146,9 @@ jobs:
         run: |
           apt update
           apt install -y python3-pytest ninja-build python3-pip clang libgtest-dev
-
-          if [[ "${{ matrix.image }}" == 'ubuntu:24.04' ]]; then
-              pip3 install cmake==3.20.3 --break-system-packages
-          else
-              pip3 install cmake==3.20.3
-          fi
+          pip3 install cmake=="3.20.3"
+        env:
+          PIP_BREAK_SYSTEM_PACKAGES: "1"
 
       - name: Configure (GCC)
         run: cmake -Bbuild-gcc -DCMAKE_BUILD_TYPE=Debug -G'Ninja Multi-Config'
