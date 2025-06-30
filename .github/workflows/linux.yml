@@ -68,7 +68,7 @@ jobs:
       run:
         shell: bash
     runs-on: ${{ matrix.host-os }}
-    container: 
+    container:
       image: rockylinux/rockylinux:8
       env:
         GH_TOKEN: ${{ github.token }}
@@ -88,7 +88,8 @@ jobs:
           dnf update -y
           dnf install -y dnf-plugins-core epel-release
           dnf config-manager --set-enabled powertools
-          dnf install -y clang-analyzer cmake gcc-c++ gh gtest-devel libasan make ninja-build p7zip p7zip-plugins re2c
+          # dnf install -y clang-analyzer cmake gcc-c++ gh gtest-devel libasan make ninja-build p7zip p7zip-plugins re2c
+          dnf install -y  p7zip p7zip-plugins
 
       # - name: Build debug ninja
       #   env:
@@ -124,7 +125,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ninja${arch}-binary-archives
-          path: ninja-linux${arch}.zip
+          path: ninja-linux${{ env.arch }}.zip
 
       # - name: Upload release asset
       #   if: github.event.action == 'published'
@@ -133,11 +134,25 @@ jobs:
       #     allowUpdates: true
       #     artifactContentType : "application/zip"
       #     replacesArtifacts: true
-      #     artifacts: ./artifact/ninja-linux${arch}.zip
+      #     artifacts: ./artifact/ninja-linux${{ env.arch }}.zip
+
+      - name: bootstrap gh cli
+        if: github.event.action == 'published'
+        run: |
+            if [[ "${arch}" == "-aarch64" ]]; then
+                gh_url_arch="https://github.com/cli/cli/releases/download/v2.74.2/gh_2.74.2_linux_arm64.tar.gz"
+            else
+                gh_url_arch="https://github.com/cli/cli/releases/download/v2.74.2/gh_2.74.2_linux_amd64.tar.gz"
+            fi
+
+            curl -sLO "${gh_url_arch}" | tar xfz - -C /usr/local/bin --strip-components=2
+            chmod 700 /usr/local/bin/gh
 
       - name: Upload release asset
         if: github.event.action == 'published'
-        run: gh release upload ${{ github.ref_name }} ninja-linux${arch}.zip --clobber --repo "${github_repo}"
+        run: |
+            gh auth status    
+            gh release upload ${{ github.ref_name }} ninja-linux${arch}.zip --clobber --repo "${github_repo}"
 
   test:
     permissions:
