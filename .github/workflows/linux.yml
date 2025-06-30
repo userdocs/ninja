@@ -83,35 +83,29 @@ jobs:
           dnf update -y
           dnf install -y dnf-plugins-core epel-release
           dnf config-manager --set-enabled powertools
-          # dnf install -y clang-analyzer cmake gcc-c++ gtest-devel libasan make ninja-build p7zip p7zip-plugins re2c
-          dnf install -y  p7zip p7zip-plugins
+          dnf install -y clang-analyzer cmake gcc-c++ gtest-devel libasan make ninja-build p7zip p7zip-plugins re2c
 
-      # - name: Build debug ninja
-      #   env:
-      #     CFLAGS: -fstack-protector-all -fsanitize=address
-      #     CXXFLAGS: -fstack-protector-all -fsanitize=address
-      #   run: |
-      #     scan-build -o scanlogs cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -B debug-build
-      #     scan-build -o scanlogs cmake --build debug-build --parallel --config Debug
-
-      # - name: Test debug ninja
-      #   run: ASAN_OPTIONS=detect_leaks=0 ./ninja_test
-      #   working-directory: debug-build
-
-      # - name: Build release ninja
-      #   run: |
-      #     cmake -GNinja -DCMAKE_BUILD_TYPE=Release -B release-build -DCMAKE_COMPILE_WARNING_AS_ERROR=1
-      #     cmake --build release-build --parallel --config Release
-      #     strip release-build/ninja
-
-      - name: test
+      - name: Build debug ninja
+        env:
+          CFLAGS: -fstack-protector-all -fsanitize=address
+          CXXFLAGS: -fstack-protector-all -fsanitize=address
         run: |
-          mkdir -p release-build
-          touch release-build/ninja${{ matrix.arch }}
+          scan-build -o scanlogs cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -B debug-build
+          scan-build -o scanlogs cmake --build debug-build --parallel --config Debug
 
-      # - name: Test release ninja
-      #   run: ./ninja_test
-      #   working-directory: release-build
+      - name: Test debug ninja
+        run: ASAN_OPTIONS=detect_leaks=0 ./ninja_test
+        working-directory: debug-build
+
+      - name: Build release ninja
+        run: |
+          cmake -GNinja -DCMAKE_BUILD_TYPE=Release -B release-build -DCMAKE_COMPILE_WARNING_AS_ERROR=1
+          cmake --build release-build --parallel --config Release
+          strip release-build/ninja
+
+      - name: Test release ninja
+        run: ./ninja_test
+        working-directory: release-build
 
       - name: Create ninja archive
         run: 7z a ninja-linux${arch}.zip ./release-build/ninja
@@ -152,7 +146,13 @@ jobs:
         run: |
           apt update
           apt install -y python3-pytest ninja-build python3-pip clang libgtest-dev
-          pip3 install cmake==3.20.3
+
+          if [[ "${{ matrix.image }}" == 'ubuntu:24.04' ]]; then
+              pip3 install cmake==3.20.3 --break-system-packages
+          else
+              pip3 install cmake==3.20.3
+          fi
+
       - name: Configure (GCC)
         run: cmake -Bbuild-gcc -DCMAKE_BUILD_TYPE=Debug -G'Ninja Multi-Config'
 
