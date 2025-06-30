@@ -84,11 +84,12 @@ jobs:
 
       - name: Install dependencies
         run: |
+          curl -fsSL https://cli.github.com/packages/rpm/gh-cli.repo | tee /etc/yum.repos.d/github-cli.repo
           dnf update -y
           dnf install -y dnf-plugins-core epel-release
           dnf config-manager --set-enabled powertools
-          # dnf install -y clang-analyzer cmake gcc-c++ gh gtest-devel libasan make ninja-build p7zip p7zip-plugins re2c
-          dnf install -y  p7zip p7zip-plugins
+          # dnf install -y clang-analyzer cmake gcc-c++ gh git gtest-devel libasan make ninja-build p7zip p7zip-plugins re2c
+          dnf install -y  p7zip p7zip-plugins gh git
 
       # - name: Build debug ninja
       #   env:
@@ -134,20 +135,6 @@ jobs:
       #     artifactContentType : "application/zip"
       #     replacesArtifacts: true
       #     artifacts: ./artifact/ninja-linux${{ env.arch }}.zip
-
-      - name: bootstrap gh cli
-        if: github.event.action == 'published'
-        run: |
-            if [[ "${arch}" == "-aarch64" ]]; then
-                gh_url_arch="https://github.com/cli/cli/releases/download/v2.74.2/gh_2.74.2_linux_arm64.tar.gz"
-            else
-                gh_url_arch="https://github.com/cli/cli/releases/download/v2.74.2/gh_2.74.2_linux_amd64.tar.gz"
-            fi
-
-            echo "url: ${gh_url_arch}"
-
-            curl -sL "${gh_url_arch}" | tar xfz - -C /usr/local/bin --strip-components=2
-            chmod 700 /usr/local/bin/gh
 
       - name: Upload release asset
         if: github.event.action == 'published'
