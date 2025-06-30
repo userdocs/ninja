@@ -105,6 +105,8 @@ jobs:
           artifactContentType : "application/zip"
           replacesArtifacts: true
           artifacts: ./artifact/ninja-linux${{ matrix.arch }}.zip
+          # generateReleaseNotes: true
+          omitBodyDuringUpdate: true
 
   test:
     runs-on: [ubuntu-latest]
