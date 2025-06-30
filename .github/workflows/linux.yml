@@ -81,8 +81,8 @@ jobs:
           curl -fsSL https://cli.github.com/packages/rpm/gh-cli.repo | tee /etc/yum.repos.d/github-cli.repo
           dnf config-manager --set-enabled powertools
           dnf update -y
-          dnf install -y make gcc-c++ libasan clang-analyzer cmake dnf-plugins-core epel-release
-          dnf install -y gtest-devel p7zip p7zip-plugins ninja-build re2c gh
+          dnf install -y dnf-plugins-core epel-release
+          dnf install -y clang-analyzer cmake gcc-c++ gh gtest-devel libasan make ninja-build p7zip p7zip-plugins re2c
 
       # - name: Build debug ninja
       #   env:
