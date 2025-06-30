@@ -110,30 +110,20 @@ jobs:
           name: ninja${{ matrix.arch }}-binary-archives
           path: artifact
 
-      # - name: Upload release asset
-      #   if: github.event.action == 'published'
-      #   uses: actions/upload-release-asset@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     upload_url: ${{ github.event.release.upload_url }}
-      #     asset_path: ./artifact/ninja-linux${{ matrix.arch }}.zip
-      #     asset_name: ninja-linux${{ matrix.arch }}.zip
-      #     asset_content_type: application/zip
-
       - name: Upload release asset
         # if: github.event.action == 'published'
         uses: ncipollo/release-action@v1
         with:
-          prerelease: false
-          artifacts: ./artifact/ninja-linux${{ matrix.arch }}.zip
-          replacesArtifacts: true
-          tag: "${{ env.github_tag }}"
-          name: "${{ env.github_tag }}"
-          bodyFile: release_body.md
+          name: "${{ github.ref_name }}"
+          tag: "${{ github.ref_name }}"
+          makeLatest: true
           allowUpdates: true
           generateReleaseNotes: true
+          prerelease: false
           artifactContentType : "application/zip"
+          replacesArtifacts: true
+          artifacts: ./artifact/ninja-linux${{ matrix.arch }}.zip
+
 
   test:
     permissions:
