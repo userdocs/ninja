@@ -68,10 +68,11 @@ jobs:
       run:
         shell: bash
     runs-on: ${{ matrix.host-os }}
-    container: rockylinux/rockylinux:8
-    env:
-      GH_TOKEN: ${{ github.token }}
-      arch: ${{ matrix.arch }}
+    container: 
+      image: rockylinux/rockylinux:8
+      env:
+        GH_TOKEN: ${{ github.token }}
+        arch: ${{ matrix.arch }}
     steps:
       - uses: actions/checkout@v4
         with:
