@@ -3,6 +3,8 @@ name: Linux
 on:
   pull_request:
   push:
+    branches: ['**']
+    tags-ignore: ['**']  # Don't trigger on tag pushes
   release:
     types: published
 
@@ -111,19 +113,18 @@ jobs:
           path: artifact
 
       - name: Upload release asset
-        # if: github.event.action == 'published'
+        if: github.event.action == 'published'
         uses: ncipollo/release-action@v1
         with:
-          name: "${{ github.ref_name }}"
-          tag: "${{ github.ref_name }}"
-          makeLatest: true
+          # name: "${{ github.ref_name }}"
+          # tag: "${{ github.ref_name }}"
+          # makeLatest: true
           allowUpdates: true
           generateReleaseNotes: true
-          prerelease: false
+          # prerelease: false
           artifactContentType : "application/zip"
           replacesArtifacts: true
           artifacts: ./artifact/ninja-linux${{ matrix.arch }}.zip
-
 
   test:
     permissions:
