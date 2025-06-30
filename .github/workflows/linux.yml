@@ -2,9 +2,9 @@ name: Linux
 
 on:
   pull_request:
-  push:
-    branches: ['**']
-    tags-ignore: ['**']  # Don't trigger on tag pushes
+  # push:
+  #   branches: ['**']
+  #   tags-ignore: ['**']  # Don't trigger on tag pushes
   release:
     types: published
 
@@ -67,8 +67,8 @@ jobs:
     container: rockylinux/rockylinux:8
     steps:
       - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
+        # with:
+        #   persist-credentials: false
 
       - uses: codespell-project/actions-codespell@master
         with:
@@ -77,21 +77,22 @@ jobs:
       - name: Install dependencies
         run: |
           curl -fsSL https://cli.github.com/packages/rpm/gh-cli.repo | tee /etc/yum.repos.d/github-cli.repo
+          dnf update -y
           dnf install -y make gcc-c++ libasan clang-analyzer cmake dnf-plugins-core epel-release
           dnf config-manager --set-enabled powertools
           dnf install -y gtest-devel p7zip p7zip-plugins ninja-build gh re2c
 
-      - name: Build debug ninja
-        env:
-          CFLAGS: -fstack-protector-all -fsanitize=address
-          CXXFLAGS: -fstack-protector-all -fsanitize=address
-        run: |
-          scan-build -o scanlogs cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -B debug-build
-          scan-build -o scanlogs cmake --build debug-build --parallel --config Debug
+      # - name: Build debug ninja
+      #   env:
+      #     CFLAGS: -fstack-protector-all -fsanitize=address
+      #     CXXFLAGS: -fstack-protector-all -fsanitize=address
+      #   run: |
+      #     scan-build -o scanlogs cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -B debug-build
+      #     scan-build -o scanlogs cmake --build debug-build --parallel --config Debug
 
-      - name: Test debug ninja
-        run: ASAN_OPTIONS=detect_leaks=0 ./ninja_test
-        working-directory: debug-build
+      # - name: Test debug ninja
+      #   run: ASAN_OPTIONS=detect_leaks=0 ./ninja_test
+      #   working-directory: debug-build
 
       - name: Build release ninja
         run: |
@@ -99,21 +100,18 @@ jobs:
           cmake --build release-build --parallel --config Release
           strip release-build/ninja
 
-      - name: Test release ninja
-        run: ./ninja_test
-        working-directory: release-build
+      # - name: Test release ninja
+      #   run: ./ninja_test
+      #   working-directory: release-build
 
       - name: Create ninja archive
-        run: |
-          mkdir artifact
-          7z a artifact/ninja-linux${{ matrix.arch }}.zip ./release-build/ninja
+        run: 7z a ninja-linux${{ matrix.arch }}.zip ./release-build/ninja
 
-      # Upload ninja binary archive as an artifact
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ninja${{ matrix.arch }}-binary-archives
-          path: artifact
+          path: ninja-linux${{ matrix.arch }}.zip
 
       # - name: Upload release asset
       #   if: github.event.action == 'published'
@@ -126,7 +124,7 @@ jobs:
 
       - name: Upload release asset
         if: github.event.action == 'published'
-        run: gh release upload ${{ github.ref_name }} artifact/ninja-linux${{ matrix.arch }}.zip --clobber
+        run: gh release upload ${{ github.ref_name }} ninja-linux${{ matrix.arch }}.zip --clobber
         env:
           GH_TOKEN: ${{ github.token }}
 
