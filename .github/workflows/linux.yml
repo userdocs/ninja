@@ -117,13 +117,13 @@ jobs:
       #   working-directory: release-build
 
       - name: Create ninja archive
-        run: 7z a ninja-linux${{ env.arch }}.zip ./release-build/ninja
+        run: 7z a ninja-linux${arch}.zip ./release-build/ninja
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ninja${{ env.arch }}-binary-archives
-          path: ninja-linux${{ env.arch }}.zip
+          name: ninja${arch}-binary-archives
+          path: ninja-linux${arch}.zip
 
       # - name: Upload release asset
       #   if: github.event.action == 'published'
@@ -132,11 +132,11 @@ jobs:
       #     allowUpdates: true
       #     artifactContentType : "application/zip"
       #     replacesArtifacts: true
-      #     artifacts: ./artifact/ninja-linux${{ env.arch }}.zip
+      #     artifacts: ./artifact/ninja-linux${arch}.zip
 
       - name: Upload release asset
         if: github.event.action == 'published'
-        run: gh release upload ${{ github.ref_name }} ninja-linux${{ env.arch }}.zip --clobber
+        run: gh release upload ${{ github.ref_name }} ninja-linux${arch}.zip --clobber --repo "${github_repo}"
 
   test:
     permissions:
