@@ -110,16 +110,30 @@ jobs:
           name: ninja${{ matrix.arch }}-binary-archives
           path: artifact
 
+      # - name: Upload release asset
+      #   if: github.event.action == 'published'
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ github.event.release.upload_url }}
+      #     asset_path: ./artifact/ninja-linux${{ matrix.arch }}.zip
+      #     asset_name: ninja-linux${{ matrix.arch }}.zip
+      #     asset_content_type: application/zip
+
       - name: Upload release asset
-        if: github.event.action == 'published'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # if: github.event.action == 'published'
+        uses: ncipollo/release-action@v1
         with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./artifact/ninja-linux${{ matrix.arch }}.zip
-          asset_name: ninja-linux${{ matrix.arch }}.zip
-          asset_content_type: application/zip
+          prerelease: false
+          artifacts: ./artifact/ninja-linux${{ matrix.arch }}.zip
+          replacesArtifacts: true
+          tag: "${{ env.github_tag }}"
+          name: "${{ env.github_tag }}"
+          bodyFile: release_body.md
+          allowUpdates: true
+          generateReleaseNotes: true
+          artifactContentType : "application/zip"
 
   test:
     permissions:
@@ -132,7 +146,7 @@ jobs:
       run:
         shell: bash
     runs-on: ${{ matrix.host-os }}
-    container: ubuntu:20.04
+    container: ubuntu:22.04
     steps:
       - uses: actions/checkout@v4
         with:
