@@ -74,9 +74,10 @@ jobs:
           ignore_words_list: fo,wee,addin,notin
       - name: Install dependencies
         run: |
+          curl -fsSL https://cli.github.com/packages/rpm/gh-cli.repo | sudo tee /etc/yum.repos.d/github-cli.repo
           dnf install -y make gcc-c++ libasan clang-analyzer cmake dnf-plugins-core epel-release
           dnf config-manager --set-enabled powertools
-          dnf install -y gtest-devel p7zip p7zip-plugins ninja-build
+          dnf install -y gtest-devel p7zip p7zip-plugins ninja-build gh
 
       - name: Build debug ninja
         env:
@@ -116,16 +117,11 @@ jobs:
       #   if: github.event.action == 'published'
       #   uses: ncipollo/release-action@v1
       #   with:
-      #     # name: "${{ github.ref_name }}"
-      #     # tag: "${{ github.ref_name }}"
-      #     # makeLatest: true
       #     allowUpdates: true
-      #     generateReleaseNotes: true
-      #     # prerelease: false
       #     artifactContentType : "application/zip"
       #     replacesArtifacts: true
       #     artifacts: ./artifact/ninja-linux${{ matrix.arch }}.zip
-      
+
       - name: Upload release asset
         if: github.event.action == 'published'
         env:
