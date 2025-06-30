@@ -68,7 +68,7 @@ jobs:
       run:
         shell: bash
     runs-on: ${{ matrix.host-os }}
-    container:  rockylinux/rockylinux:8
+    container: rockylinux/rockylinux:8
     steps:
       - uses: actions/checkout@v4
         with:
@@ -123,7 +123,7 @@ jobs:
           allowUpdates: true
           artifactContentType : "application/zip"
           replacesArtifacts: true
-          artifacts: ./artifact/ninja-linux${{ matrix.arch }}.zip
+          artifacts: ./ninja-linux${{ matrix.arch }}.zip
 
   test:
     permissions:
