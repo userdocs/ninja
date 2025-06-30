@@ -71,6 +71,7 @@ jobs:
     container: rockylinux/rockylinux:8
     env:
       GH_TOKEN: ${{ github.token }}
+      arch: ${{ matrix.arch }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -100,24 +101,29 @@ jobs:
       #   run: ASAN_OPTIONS=detect_leaks=0 ./ninja_test
       #   working-directory: debug-build
 
-      - name: Build release ninja
+      # - name: Build release ninja
+      #   run: |
+      #     cmake -GNinja -DCMAKE_BUILD_TYPE=Release -B release-build -DCMAKE_COMPILE_WARNING_AS_ERROR=1
+      #     cmake --build release-build --parallel --config Release
+      #     strip release-build/ninja
+
+      - name: test
         run: |
-          cmake -GNinja -DCMAKE_BUILD_TYPE=Release -B release-build -DCMAKE_COMPILE_WARNING_AS_ERROR=1
-          cmake --build release-build --parallel --config Release
-          strip release-build/ninja
+          mkdir -p release-build
+          touch release-build/ninja
 
       # - name: Test release ninja
       #   run: ./ninja_test
       #   working-directory: release-build
 
       - name: Create ninja archive
-        run: 7z a ninja-linux${{ matrix.arch }}.zip ./release-build/ninja
+        run: 7z a ninja-linux${{ env.arch }}.zip ./release-build/ninja
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ninja${{ matrix.arch }}-binary-archives
-          path: ninja-linux${{ matrix.arch }}.zip
+          name: ninja${{ env.arch }}-binary-archives
+          path: ninja-linux${{ env.arch }}.zip
 
       # - name: Upload release asset
       #   if: github.event.action == 'published'
@@ -126,15 +132,11 @@ jobs:
       #     allowUpdates: true
       #     artifactContentType : "application/zip"
       #     replacesArtifacts: true
-      #     artifacts: ./artifact/ninja-linux${{ matrix.arch }}.zip
-
-      - name: Authenticate GitHub CLI
-        if: github.event.action == 'published'
-        run: gh auth login
+      #     artifacts: ./artifact/ninja-linux${{ env.arch }}.zip
 
       - name: Upload release asset
         if: github.event.action == 'published'
-        run: gh release upload ${{ github.ref_name }} ninja-linux${{ matrix.arch }}.zip --clobber
+        run: gh release upload ${{ github.ref_name }} ninja-linux${{ env.arch }}.zip --clobber
 
   test:
     permissions:
