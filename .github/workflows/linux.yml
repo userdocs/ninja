@@ -108,12 +108,12 @@ jobs:
         working-directory: release-build
 
       - name: Create ninja archive
-        run: 7z a ninja-linux${arch}.zip ./release-build/ninja
+        run: 7z a ninja-linux${{ matrix.arch }}.zip ./release-build/ninja
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ninja${arch}-binary-archives
+          name: ninja${{ matrix.arch }}-binary-archives
           path: ninja-linux${{ matrix.arch }}.zip
 
       - name: Upload release asset
