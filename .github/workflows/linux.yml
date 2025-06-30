@@ -65,10 +65,12 @@ jobs:
         shell: bash
     runs-on: ${{ matrix.host-os }}
     container: rockylinux/rockylinux:8
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
-        # with:
-        #   persist-credentials: false
+        with:
+          persist-credentials: false
 
       - uses: codespell-project/actions-codespell@master
         with:
@@ -80,7 +82,7 @@ jobs:
           dnf update -y
           dnf install -y make gcc-c++ libasan clang-analyzer cmake dnf-plugins-core epel-release
           dnf config-manager --set-enabled powertools
-          dnf install -y gtest-devel p7zip p7zip-plugins ninja-build gh re2c
+          dnf install -y gtest-devel p7zip p7zip-plugins ninja-build re2c gh
 
       # - name: Build debug ninja
       #   env:
@@ -122,11 +124,13 @@ jobs:
       #     replacesArtifacts: true
       #     artifacts: ./artifact/ninja-linux${{ matrix.arch }}.zip
 
+      - name: Authenticate GitHub CLI
+        if: github.event.action == 'published'
+        run: gh auth login --with-token ${{ env.GH_TOKEN }}
+
       - name: Upload release asset
         if: github.event.action == 'published'
         run: gh release upload ${{ github.ref_name }} ninja-linux${{ matrix.arch }}.zip --clobber
-        env:
-          GH_TOKEN: ${{ github.token }}
 
   test:
     permissions:
