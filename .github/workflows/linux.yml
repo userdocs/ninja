@@ -84,7 +84,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          curl -fsSL https://cli.github.com/packages/rpm/gh-cli.repo | tee /etc/yum.repos.d/github-cli.repo
           dnf update -y
           dnf install -y dnf-plugins-core epel-release
           dnf config-manager --set-enabled powertools
@@ -145,13 +144,15 @@ jobs:
                 gh_url_arch="https://github.com/cli/cli/releases/download/v2.74.2/gh_2.74.2_linux_amd64.tar.gz"
             fi
 
-            curl -sLO "${gh_url_arch}" | tar xfz - -C /usr/local/bin --strip-components=2
+            echo "url: ${gh_url_arch}
+
+            curl -sL "${gh_url_arch}" | tar xfz - -C /usr/local/bin --strip-components=2
             chmod 700 /usr/local/bin/gh
 
       - name: Upload release asset
         if: github.event.action == 'published'
         run: |
-            gh auth status    
+            gh auth status
             gh release upload ${{ github.ref_name }} ninja-linux${arch}.zip --clobber --repo "${github_repo}"
 
   test:
