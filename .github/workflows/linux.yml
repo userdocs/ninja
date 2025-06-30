@@ -137,12 +137,13 @@ jobs:
     strategy:
       matrix:
         host-os: ["ubuntu-latest", "ubuntu-24.04-arm"]
+        image: ["ubuntu:20.04", "ubuntu:22.04", "ubuntu:24.04"]
       fail-fast: false
     defaults:
       run:
         shell: bash
     runs-on: ${{ matrix.host-os }}
-    container: ubuntu:22.04
+    container: ${{ matrix.image }}
     steps:
       - uses: actions/checkout@v4
         with:
