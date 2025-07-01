@@ -10,7 +10,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# test-2 concurrency test - change comment
+# test-2 2 concurrency test - change comment
 
 jobs:
   build:
