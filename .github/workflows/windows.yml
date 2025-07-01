@@ -6,6 +6,8 @@ on:
   release:
     types: published
 
+# test-1 concurrency test - change comment
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
